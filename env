@@ -1,0 +1,1 @@
+export DELIVERY_DB_URL="postgres://toma:pswd@localhost:5372/toma?sslmode=disable"
