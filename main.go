@@ -84,7 +84,7 @@ func main() {
 	}
 
 	// init service
-	svc := service.NewService(databaseInterface)
+	svc := service.NewService(databaseInterface, windowSize)
 
 	// processing input is storing and processing (nothing in this case) each event
 	err = svc.ProcessInput(jsonLines)
