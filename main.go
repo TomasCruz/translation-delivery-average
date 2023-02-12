@@ -8,6 +8,7 @@ import (
 
 	"github.com/TomasCruz/translation-delivery-average/configuration"
 	"github.com/TomasCruz/translation-delivery-average/database"
+	"github.com/TomasCruz/translation-delivery-average/presenter"
 	"github.com/TomasCruz/translation-delivery-average/service"
 )
 
@@ -76,14 +77,26 @@ func main() {
 		log.Fatalf("failed to initialize database: %s", err)
 	}
 
-	// init service
-	/*svc :=*/
-	service.NewService(databaseInterface)
+	// extract json lines from input
+	jsonLines, err := presenter.FileToStrings(inputFile)
+	if err != nil {
+		log.Fatalf("failed to read input: %s", err)
+	}
 
-	//processInput()
-	//averages := calculateAverages()
-	// presentAverages()
-	fmt.Println("done")
+	// init service
+	svc := service.NewService(databaseInterface)
+
+	// processing input is storing and processing (nothing in this case) each event
+	err = svc.ProcessInput(jsonLines)
+	if err != nil {
+		log.Fatalf("failed to process input: %s", err)
+	}
+
+	// calculate averages from events stored in the DB
+	averages := svc.CalculateAverages()
+
+	// present averages (simple text output)
+	presenter.PresentAverages(averages)
 }
 
 func setupFromEnvVars() (config configuration.Config) {

@@ -8,15 +8,25 @@
             "name": "Launch Package",
             "type": "go",
             "request": "launch",
-            "mode": "debug",
-            "program": "${workspaceFolder}",
-			// "buildFlags": "-tags='integration'",
+            "mode": "auto",
+            "program": "${fileDirname}",
             "env": {
-                "ILIAD_DB_URL": "postgres://toma:pswd@localhost:5372/toma?sslmode=disable",
-                "GRPC_PORT": "7777",
+                "DELIVERY_DB_URL": "postgres://toma:pswd@localhost:5372/toma?sslmode=disable",
                 "CGO_ENABLED": "0"
             },
-            "args": ["-test.v"]
+            "args": ["-input_file", "events.json", "-window_size", "10"]
+       },
+       {
+            "name": "Test Package",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}",
+            "env": {
+                "DELIVERY_DB_URL": "postgres://toma:pswd@localhost:5372/toma?sslmode=disable",
+                "CGO_ENABLED": "0"
+            },
+            "args": ["-input_file", "events.json", "-window_size", "10"]
         }
     ]
 }
