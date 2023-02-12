@@ -15,7 +15,7 @@ fresh: db all
 
 .PHONY: run
 run:
-	./translation-delivery-average --input_file events.json --window_size 10
+	./translation-delivery-average --input_file events.txt --window_size 10
 
 .PHONY: db_start
 db_start:
