@@ -13,30 +13,6 @@ import (
 )
 
 func main() {
-	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, os.Args[0], "has mandatory argument 'input_file',")
-		fmt.Fprintln(os.Stderr, " and optional argument 'window_size' (10 by default, has to be a positive integer).")
-	}
-
-	var (
-		windowSize int
-		inputFile  string
-	)
-
-	flag.IntVar(&windowSize, "window_size", 10, "window size, a positive integer")
-	flag.StringVar(&inputFile, "input_file", "", "input file in JSON format")
-	flag.Parse()
-
-	if inputFile == "" {
-		flag.Usage()
-		os.Exit(1)
-	}
-
-	if windowSize <= 0 {
-		flag.Usage()
-		os.Exit(1)
-	}
-
 	// In a real world scenario, I would have a perpetually running worker app,
 	// storing and processing incoming queue messages, i.e. events. By processing I don't mean the average calculations,
 	// and in this case no processing is required as described below.
@@ -67,6 +43,30 @@ func main() {
 	// Another thing is what is being translated to what - there would likely be an important KPI of translation average of "en" to "fr", ge to "en" etc.
 	// That would require indexing of source and destination languages of the events. That could be done with GIN indexing of JSONB payload field,
 	// or (as with the approach I've taken) duplicating playload info and indexing it. I've just done the overall average, as required
+
+	flag.Usage = func() {
+		fmt.Fprintln(os.Stderr, os.Args[0], "has mandatory argument 'input_file',")
+		fmt.Fprintln(os.Stderr, " and optional argument 'window_size' (10 by default, has to be a positive integer).")
+	}
+
+	var (
+		windowSize int
+		inputFile  string
+	)
+
+	flag.IntVar(&windowSize, "window_size", 10, "window size, a positive integer")
+	flag.StringVar(&inputFile, "input_file", "", "input file in JSON format")
+	flag.Parse()
+
+	if inputFile == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if windowSize <= 0 {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	// populate configuration
 	config := setupFromEnvVars()
