@@ -1,10 +1,41 @@
 package service
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
+
+const (
+	minLayout = "2006-01-02 15:04:05"
+)
+
+type MinuteTime struct {
+	T time.Time
+}
+
+func (ct *MinuteTime) UnmarshalJSON(b []byte) (err error) {
+	s := strings.Trim(string(b), "\"")
+	if s == "null" {
+		ct.T = time.Time{}
+		return
+	}
+
+	ct.T, err = time.Parse(minLayout, s)
+	return
+}
+
+func (ct *MinuteTime) MarshalJSON() ([]byte, error) {
+	if ct.T.UnixNano() == int64(0) {
+		return []byte("null"), nil
+	}
+
+	return []byte(fmt.Sprintf("\"%s\"", ct.T.Format(minLayout))), nil
+}
 
 type Average struct {
-	Date                time.Time `json:"date" example:"2018-12-26 18:12:19"`
-	AverageDeliveryTime int       `json:"average_delivery_time" example:"20"`
+	Date                MinuteTime `json:"date" example:"2018-12-26 18:12:19"`
+	AverageDeliveryTime int        `json:"average_delivery_time" example:"20"`
 }
 
 // TODO
