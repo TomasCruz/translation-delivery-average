@@ -87,3 +87,29 @@ func (pDB postgresDB) insertTranslationDeliveredEvent(event service.TranslationD
 
 	return nil
 }
+
+func (pDB postgresDB) GetFirstTranslationDeliveredEventTime() (service.MinuteTime, error) {
+	var eventTS time.Time
+
+	err := pDB.db.QueryRow(`SELECT MIN(event_ts) FROM events`).Scan(&eventTS)
+	if err != nil {
+		return service.MinuteTime{}, err
+	}
+
+	return service.MinuteTime{
+		T: time.Date(eventTS.Year(), eventTS.Month(), eventTS.Day(), eventTS.Hour(), eventTS.Minute(), 0, 0, eventTS.Location()),
+	}, nil
+}
+
+func (pDB postgresDB) GetLastTranslationDeliveredEventTime() (service.MinuteTime, error) {
+	var eventTS time.Time
+
+	err := pDB.db.QueryRow(`SELECT MAX(event_ts) FROM events`).Scan(&eventTS)
+	if err != nil {
+		return service.MinuteTime{}, err
+	}
+
+	return service.MinuteTime{
+		T: time.Date(eventTS.Year(), eventTS.Month(), eventTS.Day(), eventTS.Hour(), eventTS.Minute(), 0, 0, eventTS.Location()),
+	}, nil
+}
