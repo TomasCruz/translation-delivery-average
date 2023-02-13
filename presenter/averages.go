@@ -13,7 +13,8 @@ import (
 // calculated_averages table, much like pagination is usually done.
 func PresentAverages(averages []service.Average) error {
 	for _, a := range averages {
-		s := fmt.Sprintf(`{"date":"%s","average_delivery_time":%f}`, a.Date.Format(service.MinLayout), a.AverageDeliveryTime)
+		// json.Marshal not great with custom types
+		s := fmt.Sprintf(`{"date":"%s","average_delivery_time":%v}`, a.Date.Format(service.MinLayout), a.AverageDeliveryTime)
 		fmt.Println(s)
 	}
 
