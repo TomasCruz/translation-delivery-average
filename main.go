@@ -103,7 +103,10 @@ func main() {
 	}
 
 	// present averages (simple text output)
-	presenter.PresentAverages(averages)
+	err = presenter.PresentAverages(averages)
+	if err != nil {
+		log.Fatalf("failed to present averages: %s", err)
+	}
 }
 
 func setupFromEnvVars() (config configuration.Config) {

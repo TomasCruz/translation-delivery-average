@@ -2,7 +2,6 @@ package presenter
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 )
 
@@ -10,7 +9,6 @@ import (
 func FileToStrings(fileName string) (textLines []string, err error) {
 	var file *os.File
 	if file, err = os.Open(fileName); err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer file.Close()

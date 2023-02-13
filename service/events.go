@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -53,4 +54,47 @@ type TranslationDeliveredEvent struct {
 	EventName      string          `json:"event_name" example:"translation_delivered"`
 	Duration       int             `json:"duration" example:"20"`
 	NrWords        int             `json:"nr_words" example:"100"`
+}
+
+type DBTranslationDeliveredEvent struct {
+	Timestamp      time.Time
+	TranslationID  string
+	SourceLanguage string
+	TargetLanguage string
+	ClientName     string
+	EventName      string
+	Duration       int
+	NrWords        int
+}
+
+func NewDBTranslationDeliveredEventFromModel(event TranslationDeliveredEvent) DBTranslationDeliveredEvent {
+	return DBTranslationDeliveredEvent{
+		Timestamp:      event.Timestamp.T,
+		TranslationID:  event.TranslationID,
+		SourceLanguage: event.SourceLanguage,
+		TargetLanguage: event.TargetLanguage,
+		ClientName:     event.ClientName,
+		EventName:      event.EventName,
+		Duration:       event.Duration,
+		NrWords:        event.NrWords,
+	}
+}
+
+func NewTranslationDeliveredEventFromEvent(ev Event) (TranslationDeliveredEvent, error) {
+	var tdEvent DBTranslationDeliveredEvent
+	err := json.Unmarshal([]byte(ev.Payload), &tdEvent)
+	if err != nil {
+		return TranslationDeliveredEvent{}, err
+	}
+
+	return TranslationDeliveredEvent{
+		Timestamp:      ev.EventTS,
+		TranslationID:  ev.EventID,
+		SourceLanguage: tdEvent.SourceLanguage,
+		TargetLanguage: tdEvent.TargetLanguage,
+		ClientName:     tdEvent.ClientName,
+		EventName:      ev.EventName,
+		Duration:       tdEvent.Duration,
+		NrWords:        tdEvent.NrWords,
+	}, nil
 }
