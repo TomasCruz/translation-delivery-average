@@ -97,7 +97,10 @@ func main() {
 	}
 
 	// calculate averages from events stored in the DB
-	averages := svc.CalculateAverages()
+	averages, err := svc.CalculateAverages()
+	if err != nil {
+		log.Fatalf("failed to calculate averages: %s", err)
+	}
 
 	// present averages (simple text output)
 	presenter.PresentAverages(averages)

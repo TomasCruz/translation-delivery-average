@@ -7,6 +7,6 @@ type Database interface {
 	StoreTranslationDeliveredEvent(event TranslationDeliveredEvent) error
 	ListTranslationDeliveredEvents(endMinute time.Time, windowSize int) ([]TranslationDeliveredEvent, error)
 	GetEventByID(id string) (Event, error)
-	GetFirstTranslationDeliveredEventTime() (MinuteTime, error)
-	GetLastTranslationDeliveredEventTime() (MinuteTime, error)
+	GetFirstTranslationDeliveredEventTime() (time.Time, error)
+	GetLastTranslationDeliveredEventTime() (time.Time, error)
 }
