@@ -18,7 +18,7 @@ func (svc Service) ProcessInput(jsonLines []string) error {
 	return nil
 }
 
-// processSingleEvent sends an event to a corresponding processing function; directing done by this function is dealt by with Kafka in a real worker app
+// processSingleEvent sends an event to a corresponding processing function; directing done by this function is dealt by Kafka through topics in a worker app
 func (svc Service) processSingleEvent(line string) error {
 	var event Event
 

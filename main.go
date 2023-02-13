@@ -87,6 +87,10 @@ func main() {
 	svc := service.NewService(databaseInterface, windowSize)
 
 	// processing input is storing and processing (nothing in this case) each event
+	//
+	// The sequential approach used here only works for a limited size of events. For great number, it would be the worker app
+	// that would receive events and process them by calling processTranslationDeliveredEvent for each,
+	// by having it registered for Kafka topic "translation_delivered"
 	err = svc.ProcessInput(jsonLines)
 	if err != nil {
 		log.Fatalf("failed to process input: %s", err)
