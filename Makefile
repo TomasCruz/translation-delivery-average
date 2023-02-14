@@ -5,6 +5,7 @@ all: clean build
 clean:
 	go clean
 	rm -f ./translation-delivery-average
+	rm -f ./tests/mocks/*.go
 
 .PHONY: build
 build:
@@ -32,3 +33,16 @@ db_restart:
 
 psql:
 	docker run -it --rm --link delivery_data:postgres postgres psql postgresql://toma:pswd@delivery_data
+
+# Testing
+.PHONY: mocks
+mocks:
+	rm -f ./tests/mocks/*.go
+	CGO_ENABLED=1 /usr/local/go/bin/mockery --all --output ./tests/mocks --dir ./service/
+
+.PHONY: test
+test: mocks fmt
+	go test -v -count=1 -tags test  ./...
+
+fmt:
+	gofmt -l -w -e ./

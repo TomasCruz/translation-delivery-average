@@ -3,6 +3,8 @@ package service
 import (
 	"encoding/json"
 	"log"
+
+	"github.com/TomasCruz/translation-delivery-average/entities"
 )
 
 // ProcessInput instantiates and stores an event from each of jsonLines
@@ -21,15 +23,15 @@ func (svc Service) ProcessInput(jsonLines []string) error {
 
 // processSingleEvent sends an event to a corresponding processing function; directing done by this function is dealt by Kafka through topics in a worker app
 func (svc Service) processSingleEvent(line string) error {
-	var event Event
+	var event entities.Event
 
 	err := json.Unmarshal([]byte(line), &event)
 	if err != nil {
 		return err
 	}
 
-	if event.EventName == TranslationDeliveredEventName {
-		var translationDeliveredEvent TranslationDeliveredEvent
+	if event.EventName == entities.TranslationDeliveredEventName {
+		var translationDeliveredEvent entities.TranslationDeliveredEvent
 
 		err = json.Unmarshal([]byte(line), &translationDeliveredEvent)
 		if err != nil {
@@ -38,7 +40,7 @@ func (svc Service) processSingleEvent(line string) error {
 
 		err = svc.processTranslationDeliveredEvent(line, translationDeliveredEvent)
 		if err != nil {
-			if err == ErrEventIDPresent {
+			if err == entities.ErrEventIDPresent {
 				log.Printf("event %s already processed, skipping\n", translationDeliveredEvent.TranslationID)
 				return nil
 			} else {
@@ -51,9 +53,9 @@ func (svc Service) processSingleEvent(line string) error {
 }
 
 // processTranslationDeliveredEvent stores and processes (nothing in this case) the event; this function would be used in the worker app described in main.go comment
-func (svc Service) processTranslationDeliveredEvent(line string, tdEvent TranslationDeliveredEvent) error {
+func (svc Service) processTranslationDeliveredEvent(line string, tdEvent entities.TranslationDeliveredEvent) error {
 	// construct the event; keep original as payload
-	event := Event{
+	event := entities.Event{
 		EventID:   tdEvent.TranslationID,
 		EventName: tdEvent.EventName,
 		EventTS:   tdEvent.Timestamp,

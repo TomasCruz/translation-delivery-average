@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/TomasCruz/translation-delivery-average/entities"
 )
 
 const (
-	MinLayout = "2006-01-02 15:04:05"
+	MinLayout string = "2006-01-02 15:04:05"
 )
 
 type MinuteTime struct {
@@ -76,7 +78,7 @@ func (svc Service) CalculateAverages() ([]Average, error) {
 
 		durationSum := float64(0)
 		for _, ev := range events {
-			tdEvent, err := NewTranslationDeliveredEventFromEvent(ev)
+			tdEvent, err := entities.NewTranslationDeliveredEventFromEvent(ev)
 			if err != nil {
 				return nil, err
 			}

@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/TomasCruz/translation-delivery-average/service"
+	"github.com/TomasCruz/translation-delivery-average/entities"
 )
 
-func (pDB postgresDB) StoreTranslationDeliveredEvent(event service.Event) error {
+func (pDB postgresDB) StoreTranslationDeliveredEvent(event entities.Event) error {
 	pTx, err := pDB.newTransaction()
 	if err != nil {
 		return err
@@ -20,7 +20,7 @@ func (pDB postgresDB) StoreTranslationDeliveredEvent(event service.Event) error 
 			return err
 		}
 	} else {
-		return service.ErrEventIDPresent
+		return entities.ErrEventIDPresent
 	}
 
 	err = pDB.insertEvent(event)
@@ -31,7 +31,7 @@ func (pDB postgresDB) StoreTranslationDeliveredEvent(event service.Event) error 
 	return nil
 }
 
-func (pDB postgresDB) GetEventByID(id string) (service.Event, error) {
+func (pDB postgresDB) GetEventByID(id string) (entities.Event, error) {
 	var (
 		eventID   string
 		eventName string
@@ -42,25 +42,25 @@ func (pDB postgresDB) GetEventByID(id string) (service.Event, error) {
 	err := pDB.db.QueryRow(`SELECT event_id, event_name, event_ts, payload FROM events WHERE event_id = $1`, id).
 		Scan(&eventID, &eventName, &eventTS, &payload)
 	if err != nil {
-		return service.Event{}, err
+		return entities.Event{}, err
 	}
 
-	return service.Event{
+	return entities.Event{
 		EventID:   eventID,
 		EventName: eventName,
-		EventTS:   service.MicrosecondTime{T: eventTS},
+		EventTS:   entities.MicrosecondTime{T: eventTS},
 		Payload:   payload,
 	}, nil
 }
 
-func (pDB postgresDB) ListTranslationDeliveredEvents(startMinute, endMinute time.Time) ([]service.Event, error) {
+func (pDB postgresDB) ListTranslationDeliveredEvents(startMinute, endMinute time.Time) ([]entities.Event, error) {
 	sqlQuery := `SELECT event_id, event_name, event_ts, payload
 				 FROM	events
 				 WHERE	event_name = $1 AND
 				 		event_ts >= $2 AND
 						event_ts <  $3`
 
-	rows, err := pDB.db.Query(sqlQuery, service.TranslationDeliveredEventName, startMinute, endMinute)
+	rows, err := pDB.db.Query(sqlQuery, entities.TranslationDeliveredEventName, startMinute, endMinute)
 	if err != nil {
 		return nil, err
 	}
@@ -73,16 +73,16 @@ func (pDB postgresDB) ListTranslationDeliveredEvents(startMinute, endMinute time
 		payload   string
 	)
 
-	var events []service.Event
+	var events []entities.Event
 	for rows.Next() {
 		if err = rows.Scan(&eventID, &eventName, &eventTS, &payload); err != nil {
 			return nil, err
 		}
 
-		events = append(events, service.Event{
+		events = append(events, entities.Event{
 			EventID:   eventID,
 			EventName: eventName,
-			EventTS:   service.MicrosecondTime{T: eventTS},
+			EventTS:   entities.MicrosecondTime{T: eventTS},
 			Payload:   payload,
 		})
 	}
@@ -90,7 +90,7 @@ func (pDB postgresDB) ListTranslationDeliveredEvents(startMinute, endMinute time
 	return events, nil
 }
 
-func (pDB postgresDB) insertEvent(event service.Event) error {
+func (pDB postgresDB) insertEvent(event entities.Event) error {
 	sqlStatement := `INSERT INTO events (event_id, event_name, event_ts, payload) VALUES ($1, $2, $3, $4) returning event_id;`
 
 	pTx, err := pDB.newTransaction()
