@@ -2,20 +2,19 @@ package database
 
 import (
 	"database/sql"
-	"encoding/json"
 	"time"
 
 	"github.com/TomasCruz/translation-delivery-average/service"
 )
 
-func (pDB postgresDB) StoreTranslationDeliveredEvent(event service.TranslationDeliveredEvent) error {
+func (pDB postgresDB) StoreTranslationDeliveredEvent(event service.Event) error {
 	pTx, err := pDB.newTransaction()
 	if err != nil {
 		return err
 	}
 	defer pTx.commitOrRollbackOnError(&err)
 
-	_, err = pDB.GetEventByID(event.TranslationID)
+	_, err = pDB.GetEventByID(event.EventID)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			return err
@@ -24,7 +23,7 @@ func (pDB postgresDB) StoreTranslationDeliveredEvent(event service.TranslationDe
 		return service.ErrEventIDPresent
 	}
 
-	err = pDB.insertTranslationDeliveredEvent(event)
+	err = pDB.insertEvent(event)
 	if err != nil {
 		return err
 	}
@@ -91,7 +90,7 @@ func (pDB postgresDB) ListTranslationDeliveredEvents(startMinute, endMinute time
 	return events, nil
 }
 
-func (pDB postgresDB) insertTranslationDeliveredEvent(event service.TranslationDeliveredEvent) error {
+func (pDB postgresDB) insertEvent(event service.Event) error {
 	sqlStatement := `INSERT INTO events (event_id, event_name, event_ts, payload) VALUES ($1, $2, $3, $4) returning event_id;`
 
 	pTx, err := pDB.newTransaction()
@@ -106,13 +105,8 @@ func (pDB postgresDB) insertTranslationDeliveredEvent(event service.TranslationD
 	}
 	defer stmt.Close()
 
-	payload, err := json.Marshal(service.NewDBTranslationDeliveredEventFromModel(event))
-	if err != nil {
-		return err
-	}
-
 	var id string
-	err = stmt.QueryRow(event.TranslationID, event.EventName, event.Timestamp.T, payload).Scan(&id)
+	err = stmt.QueryRow(event.EventID, event.EventName, event.EventTS.T, event.Payload).Scan(&id)
 	if err != nil {
 		return err
 	}

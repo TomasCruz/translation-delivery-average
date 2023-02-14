@@ -56,32 +56,13 @@ type TranslationDeliveredEvent struct {
 	NrWords        int             `json:"nr_words" example:"100"`
 }
 
-type DBTranslationDeliveredEvent struct {
-	Timestamp      time.Time
-	TranslationID  string
-	SourceLanguage string
-	TargetLanguage string
-	ClientName     string
-	EventName      string
-	Duration       int
-	NrWords        int
-}
-
-func NewDBTranslationDeliveredEventFromModel(event TranslationDeliveredEvent) DBTranslationDeliveredEvent {
-	return DBTranslationDeliveredEvent{
-		Timestamp:      event.Timestamp.T,
-		TranslationID:  event.TranslationID,
-		SourceLanguage: event.SourceLanguage,
-		TargetLanguage: event.TargetLanguage,
-		ClientName:     event.ClientName,
-		EventName:      event.EventName,
-		Duration:       event.Duration,
-		NrWords:        event.NrWords,
-	}
-}
-
 func NewTranslationDeliveredEventFromEvent(ev Event) (TranslationDeliveredEvent, error) {
-	var tdEvent DBTranslationDeliveredEvent
+	if ev.EventName != TranslationDeliveredEventName {
+		return TranslationDeliveredEvent{}, errors.New(fmt.Sprintf("event %s not of '%s' type", ev.EventID, TranslationDeliveredEventName))
+	}
+
+	var tdEvent TranslationDeliveredEvent
+
 	err := json.Unmarshal([]byte(ev.Payload), &tdEvent)
 	if err != nil {
 		return TranslationDeliveredEvent{}, err

@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"log"
 )
 
 // ProcessInput instantiates and stores an event from each of jsonLines
@@ -35,9 +36,14 @@ func (svc Service) processSingleEvent(line string) error {
 			return err
 		}
 
-		err = svc.processTranslationDeliveredEvent(translationDeliveredEvent)
+		err = svc.processTranslationDeliveredEvent(line, translationDeliveredEvent)
 		if err != nil {
-			return err
+			if err == ErrEventIDPresent {
+				log.Printf("event %s already processed, skipping\n", translationDeliveredEvent.TranslationID)
+				return nil
+			} else {
+				return err
+			}
 		}
 	}
 
@@ -45,13 +51,19 @@ func (svc Service) processSingleEvent(line string) error {
 }
 
 // processTranslationDeliveredEvent stores and processes (nothing in this case) the event; this function would be used in the worker app described in main.go comment
-func (svc Service) processTranslationDeliveredEvent(event TranslationDeliveredEvent) error {
+func (svc Service) processTranslationDeliveredEvent(line string, tdEvent TranslationDeliveredEvent) error {
+	// construct the event; keep original as payload
+	event := Event{
+		EventID:   tdEvent.TranslationID,
+		EventName: tdEvent.EventName,
+		EventTS:   tdEvent.Timestamp,
+		Payload:   line,
+	}
+
 	// store the event
 	err := svc.db.StoreTranslationDeliveredEvent(event)
 	if err != nil {
-		if err != ErrEventIDPresent {
-			return err
-		}
+		return err
 	}
 
 	// process the event (nothing in this case)
